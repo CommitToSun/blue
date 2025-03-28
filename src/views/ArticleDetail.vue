@@ -3,8 +3,11 @@
     <!-- 显示文章标题 -->
     <h2 class="text-xl font-bold mb-4">{{ article?.title }}</h2>
 
-    <!-- 富文本内容 -->
-    <div ref="divRef" class="border border-gray-300 rounded-md" style="height: 600px"></div>
+    <!-- 显示文章内容（使用 v-html 动态渲染富文本内容） -->
+    <div
+        class="border border-gray-300 rounded-md p-4"
+        v-html="article?.content"
+    ></div>
 
     <!-- 显示文章封面（如果有） -->
     <img
@@ -18,42 +21,25 @@
 
 <script setup lang="ts">
 import axios from "axios";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { AiEditor } from "aieditor";
-import "aieditor/dist/style.css";
-import { onMounted, onUnmounted, ref } from "vue";
 
-const divRef = ref<Element | null>(null);
+// 状态和路由参数
 const article = ref<null | { title: string; content: string; imageUrl?: string }>(null);
-let aiEditor: AiEditor | null = null;
-
-// 获取路由参数
 const route = useRoute();
 const articleId = route.params.id;
 
+// 页面加载时获取文章详情
 onMounted(async () => {
   try {
-    // 请求文章数据
     const { data } = await axios.get(`http://localhost:8080/api/articles/${articleId}`);
-    article.value = data;
-
-    // 初始化富文本编辑器
-    /*aiEditor = new AiEditor({
-      element: divRef.value as Element,
-      placeholder: "",
-      content: data.content || "", // 设置编辑器内容
-      read: true, // 只读模式
-    });*/
+    article.value = data; // 将返回的数据保存到状态中
   } catch (error) {
     console.error("加载文章失败：", error);
   }
 });
-
-// 销毁编辑器实例
-onUnmounted(() => {
-  if (aiEditor) {
-    aiEditor.destroy();
-    aiEditor = null;
-  }
-});
 </script>
+
+<style scoped>
+/* 样式可以根据需要调整 */
+</style>

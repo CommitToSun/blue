@@ -69,14 +69,18 @@ onMounted(async () => {
 const submitArticle = async () => {
   loading.value = true;
   try {
-    const formData = new FormData();
-    formData.append("title", article.value.title);
-    formData.append("content", aiEditor?.getHtml() || "");
+    const payload = {
+      title: article.value.title,
+      content: aiEditor?.getHtml() || "",
+    };
 
-    await axios.post("http://localhost:8080/api/articles/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    console.log("即将提交的文章数据:", payload);
+
+    const response = await axios.post("http://localhost:8080/api/articles/upload", payload, {
+      headers: { "Content-Type": "application/json" },
     });
 
+    console.log("提交成功:", response.data);
     alert("文章提交成功！");
     await router.push("/");
   } catch (error) {
