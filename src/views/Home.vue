@@ -1,34 +1,7 @@
 <template>
-  <div class="h-screen flex bg-gray-100">
-    <!-- 侧边栏 -->
-<!--    <aside
-        :class="[
-        'fixed h-full bg-gradient-to-b from-blue-600 to-indigo-800 text-white shadow-lg z-10 transition-transform duration-300',
-        isSidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full'
-      ]"
-    >
-      <div class="p-5 flex justify-between items-center">
-        <h2 class="text-2xl font-semibold">小蓝书</h2>
-        <button @click="toggleSidebar" class="text-white text-2xl focus:outline-none">
-          ✖
-        </button>
-      </div>
-      <nav class="p-5 space-y-4">
-        <router-link to="/articles/list" class="nav-item">📖 查看文章</router-link>
-        <router-link to="/upload" class="nav-item">✍️ 发布文章</router-link>
-        <router-link to="/manage" class="nav-item">🗑️ 管理文章</router-link>
-      </nav>
-    </aside>
-
-    &lt;!&ndash; 侧边栏开关按钮 &ndash;&gt;
-    <button
-        v-if="!isSidebarOpen"
-        @click="toggleSidebar"
-        class="fixed top-5 left-5 z-20 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
-    >
-      ☰
-    </button>-->
-
+  <div
+      class="h-screen flex bg-gray-100"
+  >
     <!-- 主内容 -->
     <main
         :class="[
@@ -48,15 +21,22 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+
 const isSidebarOpen = ref(false);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
+
+// 每次加载页面时回到顶部
+onMounted(() => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 </script>
 
 <style scoped>
+/* 主页面的样式保持 */
 .nav-item {
   display: block;
   padding: 12px;

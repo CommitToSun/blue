@@ -1,22 +1,34 @@
 <template>
-  <div class="p-4">
-    <h2 class="text-xl font-bold mb-4">{{ isEditing ? "编辑文章" : "上传文章" }}</h2>
+  <div class="container mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">
+      {{ isEditing ? "编辑文章" : "上传文章" }}
+    </h2>
 
     <!-- 文章标题输入框 -->
+    <label class="block text-sm font-medium text-gray-600 mb-2">
+      文章标题
+    </label>
     <input
         v-model="article.title"
         placeholder="请输入文章标题"
-        class="w-full p-6 text-2xl border border-gray-300 rounded-md mb-6 focus:outline-none focus:ring-4 focus:ring-blue-500"
+        class="w-full p-4 text-lg text-black border border-gray-300 rounded-md mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
     />
 
     <!-- 文章内容编辑器 -->
-    <div ref="editorContainer" class="border border-gray-300 rounded-md mb-6" style="height: 400px"></div>
+    <label class="block text-sm font-medium text-gray-600 mb-2">
+      文章内容
+    </label>
+    <div
+        ref="editorContainer"
+        class="border border-gray-300 rounded-md bg-white shadow-sm text-left"
+        style="height: 400px; text-align: left; overflow-y: auto; padding: 1rem;"
+    ></div>
 
     <!-- 提交按钮 -->
     <button
-        :disabled="loading"
+        :disabled="loading || !article.title || !aiEditor?.getHtml()"
         @click="submitArticle"
-        class="mt-6 w-full p-3 text-white bg-blue-500 rounded-md focus:outline-none hover:bg-blue-600 disabled:opacity-50"
+        class="w-full p-3 text-white bg-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <span v-if="loading">正在提交...</span>
       <span v-else>{{ isEditing ? "保存修改" : "提交文章" }}</span>
@@ -35,31 +47,24 @@ const router = useRouter();
 const route = useRoute();
 const articleId = route.params.id || null;
 
-// 状态变量
 const isEditing = ref(!!articleId); // 判断是否为编辑模式
-const article = ref({
-  title: "",
-  content: "", // 初始文章内容
-});
+const article = ref({ title: "", content: "" });
 const loading = ref(false);
 const editorContainer = ref(null);
 let aiEditor: AiEditor | null = null;
 
-// 初始化编辑器和加载文章数据
 onMounted(async () => {
-  // 初始化编辑器
   aiEditor = new AiEditor({
     element: editorContainer.value as Element,
     placeholder: "请输入文章内容...",
     content: article.value.content || "",
   });
 
-  // 如果是编辑模式，加载文章数据
   if (isEditing.value) {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/articles/${articleId}`);
-      article.value = data; // 将数据赋值
-      aiEditor.setContent(data.content || ""); // 将内容设置到编辑器中
+      const { data } = await axios.get(`/api/articles/${articleId}`);
+      article.value = data;
+      aiEditor.setContent(data.content || "");
     } catch (error) {
       console.error("加载文章失败：", error);
     }
@@ -74,14 +79,14 @@ const submitArticle = async () => {
       content: aiEditor?.getHtml() || "",
     };
 
-    console.log("即将提交的文章数据:", payload);
+    console.log("提交的文章数据:", payload);
 
-    const response = await axios.post("http://localhost:8080/api/articles/upload", payload, {
+    const response = await axios.post("/api/articles/upload", payload, {
       headers: { "Content-Type": "application/json" },
     });
 
-    console.log("提交成功:", response.data);
-    alert("文章提交成功！");
+    alert(isEditing.value ? "文章保存成功！" : "文章上传成功！");
+    // 页面跳转带动过渡动画
     await router.push("/");
   } catch (error) {
     console.error("提交失败：", error);
@@ -91,7 +96,6 @@ const submitArticle = async () => {
   }
 };
 
-// 卸载时销毁编辑器
 onUnmounted(() => {
   if (aiEditor) {
     aiEditor.destroy();
@@ -101,5 +105,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 样式可以根据需要调整 */
+.container {
+  max-width: 800px;
+}
 </style>
