@@ -2,7 +2,7 @@
   <div
       class="h-screen flex bg-gray-100"
   >
-    <!-- 主内容 -->
+    <!-- 内容 -->
     <main
         :class="[
         'flex-1 flex flex-col justify-center items-center text-gray-800 transition-all duration-300',
